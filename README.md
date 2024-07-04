@@ -1,6 +1,6 @@
-# Tauri Directory Manager
+# Tauri Structure Manager
 
-A Tauri plugin to manage and create directory structures for your Hubio/Tauri application.
+A Tauri plugin for organizing and managing project directories in Hubio/Tauri applications.
 
 ## Usage
 
