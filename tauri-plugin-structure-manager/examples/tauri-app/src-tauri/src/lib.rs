@@ -9,6 +9,10 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet])
         .plugin(tauri_plugin_structure_manager::init())
+        .setup(|app| {
+            app.verify_document();
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

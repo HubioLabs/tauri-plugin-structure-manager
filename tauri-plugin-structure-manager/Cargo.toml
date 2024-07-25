@@ -1,7 +1,7 @@
 [package]
 name = "tauri-plugin-structure-manager"
-version = "0.0.0"
-authors = [ "You" ]
+version = "0.3.0"
+authors = [ "Maxence Cosaque (github.com/Maxanox)" ]
 description = ""
 edition = "2021"
 rust-version = "1.70"
