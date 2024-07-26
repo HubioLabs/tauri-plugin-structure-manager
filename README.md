@@ -20,7 +20,7 @@ tauri-plugin-structure-manager = "0.3.0"
 
 ## Usage
 
-# Rust
+### Rust
 
 In your Tauri application, register the plugin:
 
@@ -40,7 +40,7 @@ pub fn run() {
 
 You can call specific structure manager methodes from anywhere with an acces to the `appHandle`.
 
-# Configuration
+### Configuration
 
 You can configure the structure in the `tauri.conf.json`.
 
