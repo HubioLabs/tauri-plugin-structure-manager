@@ -2,11 +2,13 @@
 name = "tauri-plugin-structure-manager"
 version = "0.3.0"
 authors = [ "Maxence Cosaque (github.com/Maxanox)" ]
-description = ""
+description = "A Tauri plugin for managing application structure, including directory and file creation and validation. This plugin helps ensure that the necessary project structure is maintained and allows for easy setup and verification of the application's file system."
 edition = "2021"
 rust-version = "1.70"
 exclude = ["/examples", "/webview-dist", "/webview-src", "/node_modules"]
 links = "tauri-plugin-structure-manager"
+license = "MIT"
+repository = "https://github.com/HubioLabs/tauri-plugin-structure-manager"
 
 [dependencies]
 tauri = { version = "2.0.0-beta.23" }
