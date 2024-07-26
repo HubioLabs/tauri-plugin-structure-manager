@@ -13,6 +13,6 @@
     "image:default",
     "menu:default",
     "tray:default",
-    ":default"
+    "structure-manager:default"
   ]
 }

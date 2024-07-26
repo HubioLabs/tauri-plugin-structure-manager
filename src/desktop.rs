@@ -6,14 +6,14 @@ use crate::models::*;
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
-) -> crate::Result<<R>> {
-  Ok((app.clone()))
+) -> crate::Result<StructureManager<R>> {
+  Ok(StructureManager(app.clone()))
 }
 
-/// Access to the  APIs.
-pub struct <R: Runtime>(AppHandle<R>);
+/// Access to the structure-manager APIs.
+pub struct StructureManager<R: Runtime>(AppHandle<R>);
 
-impl<R: Runtime> <R> {
+impl<R: Runtime> StructureManager<R> {
   pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
     Ok(PingResponse {
       value: payload.value,

@@ -10,24 +10,24 @@ use crate::models::*;
 const PLUGIN_IDENTIFIER: &str = "";
 
 #[cfg(target_os = "ios")]
-tauri::ios_plugin_binding!(init_plugin_);
+tauri::ios_plugin_binding!(init_plugin_structure-manager);
 
 // initializes the Kotlin or Swift plugin classes
 pub fn init<R: Runtime, C: DeserializeOwned>(
   _app: &AppHandle<R>,
   api: PluginApi<R, C>,
-) -> crate::Result<<R>> {
+) -> crate::Result<StructureManager<R>> {
   #[cfg(target_os = "android")]
   let handle = api.register_android_plugin(PLUGIN_IDENTIFIER, "ExamplePlugin")?;
   #[cfg(target_os = "ios")]
-  let handle = api.register_ios_plugin(init_plugin_)?;
-  Ok((handle))
+  let handle = api.register_ios_plugin(init_plugin_structure-manager)?;
+  Ok(StructureManager(handle))
 }
 
-/// Access to the  APIs.
-pub struct <R: Runtime>(PluginHandle<R>);
+/// Access to the structure-manager APIs.
+pub struct StructureManager<R: Runtime>(PluginHandle<R>);
 
-impl<R: Runtime> <R> {
+impl<R: Runtime> StructureManager<R> {
   pub fn ping(&self, payload: PingRequest) -> crate::Result<PingResponse> {
     self
       .0

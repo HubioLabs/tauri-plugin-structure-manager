@@ -1,1 +1,1 @@
-# Tauri Plugin .
+# Tauri Plugin structure-manager

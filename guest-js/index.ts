@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 
 export async function ping(value: string): Promise<string | null> {
-  return await invoke<{value?: string}>('plugin:|ping', {
+  return await invoke<{value?: string}>('plugin:structure-manager|ping', {
     payload: {
       value,
     },
