@@ -1,3 +1,4 @@
+use core::str;
 use std::sync::Mutex;
 
 use tauri::{
@@ -576,7 +577,9 @@ pub fn init<R: Runtime>() -> TauriPlugin<R, StructureConfig> {
             // But also to update the structure configuration at runtime. (not implemented yet)
             match &app.config().schema {
                 Some(schema) => {
-                    let structure_config: StructureConfig = serde_json::from_str(schema)?;
+                    let json_config: serde_json::Value = serde_json::from_str(schema)?;
+                    let json_structure_config = json_config["structureConfig"].clone();
+                    let structure_config: StructureConfig = serde_json::from_value(json_structure_config)?;
                     app.manage(Mutex::new(structure_config));
                 }
                 None => {}
