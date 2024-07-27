@@ -25,7 +25,6 @@ use mobile::StructureManager;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use serde::Deserialize;
-use serde_json;
 
 /// Represents the options for a structure item.
 ///
@@ -129,18 +128,16 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     /// Returns `Ok(())` if the directory structure is valid, or `Err(String)` with an error message if any issues are found.
     fn dfs_verify(&self, path: PathBuf, structure_item: &StructureItem) -> std::result::Result<(), String> {
         let mut repair = false;
-        let mut strict = false;  // TODO: Implement strict verification
+        let mut _strict = false;  // TODO: Implement strict verification
 
         match &structure_item.options {
             Some(options) => {
-                match options.repair {
-                    Some(value) => repair = value,
-                    None => {}
+                if let Some(value) = options.repair {
+                    repair = value
                 }
 
-                match options.strict {
-                    Some(value) => strict = value,
-                    None => {}
+                if let Some(value) = options.strict {
+                    _strict = value;
                 }
             }
             None => {}
@@ -169,7 +166,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
                             return Err(format!("Directory not found: {:?}", dir_path));
                         }
                     }
-                    self.dfs_verify(dir_path, &dir)?;
+                    self.dfs_verify(dir_path, dir)?;
                 }
             }
             None => {}
@@ -566,7 +563,7 @@ Builder::<R, StructureConfig>::new("structure-manager")
         // But also to update the structure configuration at runtime. (not implemented yet)
         match &app.config().schema {
             Some(schema) => {
-                let structure_config: StructureConfig = serde_json::from_str(&schema)?;
+                let structure_config: StructureConfig = serde_json::from_str(schema)?;
                 app.manage(Mutex::new(structure_config));
             }
             None => {}
