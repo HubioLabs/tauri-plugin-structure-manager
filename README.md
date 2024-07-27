@@ -14,14 +14,14 @@ A Tauri plugin for managing application structure, including directory and file 
 Run the following Cargo command in your project directory:
 
 ```bash
-cargo add tauri-plugin-structure-manager@=0.3.3
+cargo add tauri-plugin-structure-manager@0.3.4
 ```
 
 Or add the following line to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tauri-plugin-structure-manager = "0.3.3"
+tauri-plugin-structure-manager = "0.3.4"
 ```
 
 ## Usage
