@@ -1,7 +1,8 @@
 use std::sync::Mutex;
 
 use tauri::{
-    plugin::{Builder, TauriPlugin}, Manager, Runtime
+    plugin::{Builder, TauriPlugin},
+    Manager, Runtime,
 };
 
 pub use models::*;
@@ -22,9 +23,9 @@ use desktop::StructureManager;
 #[cfg(mobile)]
 use mobile::StructureManager;
 
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use serde::Deserialize;
 
 /// Represents the options for a structure item.
 ///
@@ -39,7 +40,7 @@ pub struct StructureItemOptions {
     /// but ignore extra files and directories.
     ///
     /// If `strict` is set to true, the contents of the directory (`StructureItem`) need to be exactly the same.
-    pub strict: Option<bool>
+    pub strict: Option<bool>,
 }
 
 /// Represents an item in the structure (a directory in the OS), which can contain options, files, and directories.
@@ -85,7 +86,11 @@ pub struct StructureConfig {
 /// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the structure-manager APIs.
 pub trait StructureManagerExt<R: Runtime> {
     fn structure_manager(&self) -> &StructureManager<R>;
-    fn dfs_verify(&self, path: PathBuf, structure_item: &StructureItem) -> std::result::Result<(), String>;
+    fn dfs_verify(
+        &self,
+        path: PathBuf,
+        structure_item: &StructureItem,
+    ) -> std::result::Result<(), String>;
     fn verify_app_cache(&self) -> std::result::Result<(), String>;
     fn verify_app_config(&self) -> std::result::Result<(), String>;
     fn verify_app_data(&self) -> std::result::Result<(), String>;
@@ -126,14 +131,18 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     /// # Returns
     ///
     /// Returns `Ok(())` if the directory structure is valid, or `Err(String)` with an error message if any issues are found.
-    fn dfs_verify(&self, path: PathBuf, structure_item: &StructureItem) -> std::result::Result<(), String> {
+    fn dfs_verify(
+        &self,
+        path: PathBuf,
+        structure_item: &StructureItem,
+    ) -> std::result::Result<(), String> {
         let mut repair = false;
-        let mut _strict = false;  // TODO: Implement strict verification
+        let mut _strict = false; // TODO: Implement strict verification
 
         match &structure_item.options {
             Some(options) => {
                 if let Some(value) = options.repair {
-                    repair = value
+                    repair = value;
                 }
 
                 if let Some(value) = options.strict {
@@ -161,7 +170,12 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
                     let dir_path = path.join(dir_name);
                     if !dir_path.exists() {
                         if repair {
-                            std::fs::create_dir_all(&dir_path).map_err(|e| format!("Failed to create directory: {:?}, error: {:?}", dir_path, e))?;
+                            std::fs::create_dir_all(&dir_path).map_err(|e| {
+                                format!(
+                                    "Failed to create directory: {:?}, error: {:?}",
+                                    dir_path, e
+                                )
+                            })?;
                         } else {
                             return Err(format!("Directory not found: {:?}", dir_path));
                         }
@@ -179,7 +193,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_app_cache(&self) -> std::result::Result<(), String> {
         let path = match self.path().app_cache_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve app cache path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve app cache path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -187,7 +201,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.app_cache {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `appCache` not found".to_string())
+            None => Err("Structure configuration field `appCache` not found".to_string()),
         }
     }
 
@@ -195,7 +209,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_app_config(&self) -> std::result::Result<(), String> {
         let path = match self.path().app_config_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve app config path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve app config path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -203,7 +217,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.app_config {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `appConfig` not found".to_string())
+            None => Err("Structure configuration field `appConfig` not found".to_string()),
         }
     }
 
@@ -211,7 +225,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_app_data(&self) -> std::result::Result<(), String> {
         let path = match self.path().app_data_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve app data path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve app data path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -219,7 +233,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.app_data {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `appData` not found".to_string())
+            None => Err("Structure configuration field `appData` not found".to_string()),
         }
     }
 
@@ -227,7 +241,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_app_local_data(&self) -> std::result::Result<(), String> {
         let path = match self.path().app_local_data_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve app local data path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve app local data path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -235,7 +249,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.app_local_data {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `appLocalData` not found".to_string())
+            None => Err("Structure configuration field `appLocalData` not found".to_string()),
         }
     }
 
@@ -243,7 +257,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_app_log(&self) -> std::result::Result<(), String> {
         let path = match self.path().app_log_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve app log path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve app log path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -251,7 +265,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.app_log {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `appLog` not found".to_string())
+            None => Err("Structure configuration field `appLog` not found".to_string()),
         }
     }
 
@@ -259,7 +273,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_audio(&self) -> std::result::Result<(), String> {
         let path = match self.path().audio_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve audio path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve audio path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -267,7 +281,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.audio {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `audio` not found".to_string())
+            None => Err("Structure configuration field `audio` not found".to_string()),
         }
     }
 
@@ -275,7 +289,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_cache(&self) -> std::result::Result<(), String> {
         let path = match self.path().cache_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve cache path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve cache path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -283,7 +297,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.cache {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `cache` not found".to_string())
+            None => Err("Structure configuration field `cache` not found".to_string()),
         }
     }
 
@@ -291,7 +305,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_config(&self) -> std::result::Result<(), String> {
         let path = match self.path().config_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve config path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve config path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -299,7 +313,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.config {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `config` not found".to_string())
+            None => Err("Structure configuration field `config` not found".to_string()),
         }
     }
 
@@ -307,7 +321,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_data(&self) -> std::result::Result<(), String> {
         let path = match self.path().data_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve data path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve data path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -315,7 +329,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.data {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `data` not found".to_string())
+            None => Err("Structure configuration field `data` not found".to_string()),
         }
     }
 
@@ -323,7 +337,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_desktop(&self) -> std::result::Result<(), String> {
         let path = match self.path().desktop_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve desktop path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve desktop path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -331,7 +345,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.desktop {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `desktop` not found".to_string())
+            None => Err("Structure configuration field `desktop` not found".to_string()),
         }
     }
 
@@ -339,7 +353,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_document(&self) -> std::result::Result<(), String> {
         let path = match self.path().document_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve document path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve document path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -347,7 +361,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.document {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `document` not found".to_string())
+            None => Err("Structure configuration field `document` not found".to_string()),
         }
     }
 
@@ -355,7 +369,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_download(&self) -> std::result::Result<(), String> {
         let path = match self.path().download_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve download path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve download path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -363,7 +377,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.download {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `download` not found".to_string())
+            None => Err("Structure configuration field `download` not found".to_string()),
         }
     }
 
@@ -371,7 +385,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_executable(&self) -> std::result::Result<(), String> {
         let path = match self.path().executable_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve executable path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve executable path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -379,7 +393,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.executable {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `executable` not found".to_string())
+            None => Err("Structure configuration field `executable` not found".to_string()),
         }
     }
 
@@ -387,7 +401,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_font(&self) -> std::result::Result<(), String> {
         let path = match self.path().font_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve font path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve font path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -395,7 +409,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.font {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `font` not found".to_string())
+            None => Err("Structure configuration field `font` not found".to_string()),
         }
     }
 
@@ -403,7 +417,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_home(&self) -> std::result::Result<(), String> {
         let path = match self.path().home_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve home path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve home path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -411,7 +425,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.home {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `home` not found".to_string())
+            None => Err("Structure configuration field `home` not found".to_string()),
         }
     }
 
@@ -419,7 +433,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_local_data(&self) -> std::result::Result<(), String> {
         let path = match self.path().local_data_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve local data path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve local data path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -427,7 +441,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.local_data {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `localData` not found".to_string())
+            None => Err("Structure configuration field `localData` not found".to_string()),
         }
     }
 
@@ -435,7 +449,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_picture(&self) -> std::result::Result<(), String> {
         let path = match self.path().picture_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve picture path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve picture path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -443,7 +457,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.picture {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `picture` not found".to_string())
+            None => Err("Structure configuration field `picture` not found".to_string()),
         }
     }
 
@@ -451,7 +465,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_public(&self) -> std::result::Result<(), String> {
         let path = match self.path().public_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve public path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve public path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -459,7 +473,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.public {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `public` not found".to_string())
+            None => Err("Structure configuration field `public` not found".to_string()),
         }
     }
 
@@ -467,7 +481,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_resource(&self) -> std::result::Result<(), String> {
         let path = match self.path().resource_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve resource path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve resource path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -475,7 +489,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.resource {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `resource` not found".to_string())
+            None => Err("Structure configuration field `resource` not found".to_string()),
         }
     }
 
@@ -483,7 +497,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_runtime(&self) -> std::result::Result<(), String> {
         let path = match self.path().runtime_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve runtime path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve runtime path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -491,7 +505,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.runtime {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `runtime` not found".to_string())
+            None => Err("Structure configuration field `runtime` not found".to_string()),
         }
     }
 
@@ -499,7 +513,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_temp(&self) -> std::result::Result<(), String> {
         let path = match self.path().temp_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve temp path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve temp path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -507,7 +521,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.temp {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `temp` not found".to_string())
+            None => Err("Structure configuration field `temp` not found".to_string()),
         }
     }
 
@@ -515,7 +529,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_template(&self) -> std::result::Result<(), String> {
         let path = match self.path().template_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve template path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve template path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -523,7 +537,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.template {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `template` not found".to_string())
+            None => Err("Structure configuration field `template` not found".to_string()),
         }
     }
 
@@ -531,7 +545,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
     fn verify_video(&self) -> std::result::Result<(), String> {
         let path = match self.path().video_dir() {
             Ok(path) => path,
-            Err(e) => return Err(format!("Failed to resolve video path: {:?}", e))
+            Err(e) => return Err(format!("Failed to resolve video path: {:?}", e)),
         };
 
         let state_mutex = self.state::<Mutex<StructureConfig>>();
@@ -539,37 +553,36 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
 
         match &structure_config.video {
             Some(structure_item) => self.dfs_verify(path, structure_item),
-            None => Err("Structure configuration field `video` not found".to_string())
+            None => Err("Structure configuration field `video` not found".to_string()),
         }
     }
-
-}   
+}
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R, StructureConfig> {
-Builder::<R, StructureConfig>::new("structure-manager")
-    .invoke_handler(tauri::generate_handler![commands::ping])
-    .setup(|app, api| {
-        #[cfg(mobile)]
-        let structure_manager = mobile::init(app, api)?;
-        #[cfg(desktop)]
-        let structure_manager = desktop::init(app, api)?;
-        app.manage(structure_manager);
+    Builder::<R, StructureConfig>::new("structure-manager")
+        .invoke_handler(tauri::generate_handler![commands::ping])
+        .setup(|app, api| {
+            #[cfg(mobile)]
+            let structure_manager = mobile::init(app, api)?;
+            #[cfg(desktop)]
+            let structure_manager = desktop::init(app, api)?;
+            app.manage(structure_manager);
 
-        // Load the structure configuration from the app config
-        // and store it in the app state.
-        // This will allow the structure manager to access the structure configuration,
-        // when verifying the structure of the directories. 
-        // But also to update the structure configuration at runtime. (not implemented yet)
-        match &app.config().schema {
-            Some(schema) => {
-                let structure_config: StructureConfig = serde_json::from_str(schema)?;
-                app.manage(Mutex::new(structure_config));
+            // Load the structure configuration from the app config
+            // and store it in the app state.
+            // This will allow the structure manager to access the structure configuration,
+            // when verifying the structure of the directories.
+            // But also to update the structure configuration at runtime. (not implemented yet)
+            match &app.config().schema {
+                Some(schema) => {
+                    let structure_config: StructureConfig = serde_json::from_str(schema)?;
+                    app.manage(Mutex::new(structure_config));
+                }
+                None => {}
             }
-            None => {}
-        }
-        
-        Ok(())
-    })
-    .build()
+
+            Ok(())
+        })
+        .build()
 }
