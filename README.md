@@ -11,11 +11,17 @@ A Tauri plugin for managing application structure, including directory and file 
 
 ## Installation
 
-Add the plugin to your `Cargo.toml`:
+Run the following Cargo command in your project directory:
+
+```bash
+cargo add tauri-plugin-structure-manager@=0.3.3
+```
+
+Or add the following line to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tauri-plugin-structure-manager = "0.3.0"
+tauri-plugin-structure-manager = "0.3.3"
 ```
 
 ## Usage
