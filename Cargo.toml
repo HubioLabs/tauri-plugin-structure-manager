@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-structure-manager"
-version = "0.3.2"
+version = "0.3.3"
 authors = [ "Maxence Cosaque (github.com/Maxanox)" ]
 description = "A Tauri plugin for managing application structure, including directory and file creation and validation. This plugin helps ensure that the necessary project structure is maintained and allows for easy setup and verification of the application's file system."
 edition = "2021"
