@@ -1,0 +1,59 @@
+{
+  "productName": "app",
+  "version": "0.1.0",
+  "identifier": "com.tauri.structure-manager",
+  "build": {
+    "frontendDist": "../public"
+  },
+  "plugins": {
+    "structure-manager": {
+      "document": {
+        "files": [],
+        "dirs": {
+          "Hubio": {
+            "options": {
+              "repair": true,
+              "strict": false
+            },
+            "files": [],
+            "dirs": {
+              "projets": {
+                "options": {
+                  "repair": true,
+                  "strict": false
+                },
+                "files": [],
+                "dirs": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "app",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
