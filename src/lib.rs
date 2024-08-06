@@ -118,7 +118,7 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
                                 )
                             })?;
                         } else {
-                            return Err(format!("Directory not found: {:?}", dir_path));
+                            return Err(format!("Directory not found: {:?}. \n{:?}", dir_path, structure_item));
                         }
                     }
                     self.dfs_verify(dir_path, dir)?;
