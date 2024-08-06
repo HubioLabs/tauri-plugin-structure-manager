@@ -1,5 +1,5 @@
+use log::{info, warn};
 use std::{path::PathBuf, sync::Mutex};
-use log::{info, warn, error};
 
 use tauri::{
     plugin::{Builder, TauriPlugin},
@@ -505,13 +505,16 @@ pub fn init<R: Runtime>() -> TauriPlugin<R, Option<StructureConfig>> {
         .setup(|app, api| {
             match api.config() {
                 Some(structure_config) => {
-                    info!("Using provided structure configuration\n{:?}", structure_config);
+                    info!(
+                        "Using provided structure configuration\n{:?}",
+                        structure_config
+                    );
                     app.manage(Mutex::new(structure_config.clone()))
-                },
+                }
                 None => {
                     warn!("Using default structure configuration");
                     app.manage(Mutex::new(StructureConfig::default()))
-                },
+                }
             };
 
             #[cfg(mobile)]
