@@ -17,7 +17,7 @@ pub struct PingResponse {
 /// Represents the options for a structure item.
 ///
 /// By default, a None value is considered as false.
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct StructureItemOptions {
     /// If set to true, the directory will be created if it does not exist.
     pub repair: Option<bool>,
@@ -31,7 +31,7 @@ pub struct StructureItemOptions {
 }
 
 /// Represents an item in the structure (a directory in the OS), which can contain options, files, and directories.
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct StructureItem {
     /// The options for the structure item.
     pub options: Option<StructureItemOptions>,
@@ -42,7 +42,7 @@ pub struct StructureItem {
 }
 
 /// Represents the structure configuration.
-#[derive(Deserialize, Clone, Default)]
+#[derive(Deserialize, Clone, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct StructureConfig {
     pub app_cache: Option<StructureItem>,
