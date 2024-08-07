@@ -77,22 +77,6 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
         path: PathBuf,
         structure_item: &StructureItem,
     ) -> std::result::Result<(), String> {
-        let mut repair = false;
-        let mut _strict = false; // TODO: Implement strict verification
-
-        match &structure_item.options {
-            Some(options) => {
-                if let Some(value) = options.repair {
-                    repair = value;
-                }
-
-                if let Some(value) = options.strict {
-                    _strict = value;
-                }
-            }
-            None => {}
-        }
-
         match &structure_item.files {
             Some(files) => {
                 for file in files {
@@ -110,15 +94,27 @@ impl<R: Runtime, T: Manager<R>> crate::StructureManagerExt<R> for T {
                 for (dir_name, dir) in dirs {
                     let dir_path = path.join(dir_name);
                     if !dir_path.exists() {
-                        if repair {
-                            std::fs::create_dir_all(&dir_path).map_err(|e| {
-                                format!(
-                                    "Failed to create directory: {:?}, error: {:?}",
-                                    dir_path, e
-                                )
-                            })?;
-                        } else {
-                            return Err(format!("Directory not found: {:?}. \n{:?}", dir_path, structure_item));
+                        match &dir.options {
+                            Some(options) => {
+                                let mut repair = false;
+                                if let Some(value) = options.repair {
+                                    repair = value;
+                                }
+
+                                if repair {
+                                    std::fs::create_dir_all(&dir_path).map_err(|e| {
+                                        format!(
+                                            "Failed to create directory: {:?}, error: {:?}",
+                                            dir_path, e
+                                        )
+                                    })?;
+                                } else {
+                                    return Err(format!("Directory not found: {:?}.", dir_path));
+                                }
+
+                                // if let Some(value) = options.strict {} // TODO: Implement strict mode
+                            }
+                            None => {}
                         }
                     }
                     self.dfs_verify(dir_path, dir)?;
